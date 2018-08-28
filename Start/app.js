@@ -16,15 +16,43 @@
             }
 
             // TODO2: Assign event handlers and other initializaton logic.
+            //$('get-table').click(getTable);
             $('#create-table').click(createTable);
             $('#filter-table').click(filterTable);
             $('#sort-table').click(sortTable);
             $('#create-chart').click(createChart);
             $('#freeze-header').click(freezeHeader);
+            $('#open-dialog').click(openDialog);
 
         });
     };
 
+/*
+    function getTable() {
+      Excel.run(function (context) {
+        const currentWorksheet = context.workbook.worksheets.getActiveWorksheet();
+        const testTable = currentWorksheet.tables.add("A10:O10", true);
+        testTable.name = "Test Table";
+
+        var callback;
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function() {
+          if (xmlHttp.readyState == 4 && xmlHttp.status == 200){
+            callback(xmlHttp.responseText);
+          }
+        }
+
+        testTable.getHeaderRowRange().values =
+        [["Nombre", "Apellido", "Materia1", "Materia2", "Materia3","Matricula",
+        "Correo", "Campus", "Cumple Promedio", "Es Tutor", "Periodo",
+        "Promedio", "Carrera", "Semestre", "Calificacion" ]];
+      });
+      xmlHttp.open("GET", "https://ipn-backend.herokuapp.com/tutors/list", true);
+      xmlHttp.send(null);
+      //$('#res').text(JSON.stringify(xmlHttp.responseText));
+      console.log(JSON.stringify(xmlHttp.responseText));
+    }
+*/
     // TODO3: Add handlers and business logic functions here.
     function createTable() {
        Excel.run(function (context) {
@@ -152,6 +180,27 @@
           console.log("Debug info: " + JSON.stringify(error.debugInfo));
         }
       });
+    }
+
+    let dialog = null;
+
+    function openDialog() {
+      // TODO1: Call the Office Shared API that opens a dialog.
+      Office.context.ui.displayDialogAsync(
+        'https://localhost:3000/popup.html',
+        {height: 45, width: 55},
+
+        // TODO2: Add callback parameter.
+        function (result) {
+          dialog = result.value;
+          dialog.addEventHandler(Microsoft.Office.WebExtension.EventType.DialogMessageReceived, processMessage);
+        }
+      );
+    }
+
+    function processMessage(arg) {
+      $('#res').text(arg.message);
+      dialog.close();
     }
 
 })();
